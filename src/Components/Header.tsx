@@ -10,10 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        maxWidth: '100%',
-        padding: `${theme.spacing(4)}px ${theme.spacing(8)}px`,
-    },
     backgroundImage: {
         height: '900px',
         position: 'absolute',
@@ -48,7 +44,7 @@ const Header = () => {
     const classes = useStyles();
 
     return (
-        <div className={classes.root}>
+        <>
             <img
                 alt={'header background for design'}
                 src={backgroundImage}
@@ -110,17 +106,10 @@ const Header = () => {
                         </Typography>
                         <br />
                         <br />
-                        <Button
-                            color={'primary'}
-                            variant={'contained'}
-                            style={{textAlign: 'center'}}
-                        >
-                            View Our Products
-                        </Button>
                     </Typography>
                 </Grid>
             </Grid>
-        </div>
+        </>
     );
 };
 
