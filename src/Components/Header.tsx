@@ -2,10 +2,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {makeStyles, useTheme} from '@material-ui/core/styles';
 import backgroundImage from '../assets/images/sidebackground.svg';
 import Grid from '@material-ui/core/Grid';
-import Hidden from '@material-ui/core/Hidden';
 import logo from '../assets/images/bestbuyproperties-default-logo.png';
 import TextField from '@material-ui/core/TextField';
-import {NavLink} from 'react-router-dom';
+import {NavLink, RouteComponentProps, withRouter} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import twitter from '../assets/icons/twitter.svg';
 import whatsapp from '../assets/icons/whatsapp.svg';
@@ -70,7 +69,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Header = () => {
+const Header = ({location}: RouteComponentProps) => {
     const classes = useStyles();
     const theme = useTheme();
     const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -126,19 +125,21 @@ const Header = () => {
                 src={backgroundImage}
                 className={classes.backgroundImage}
             />
-            <aside className={classes.socials}>
-                <IconButton>
-                    <img height={'32px'} src={whatsapp} alt={'Whatsapp link'} />
-                </IconButton>
-                <br />
-                <IconButton>
-                    <img height={'32px'} src={twitter} alt={'Twitter link'} />
-                </IconButton>
-                <br />
-                <IconButton>
-                    <img height={'32px'} src={facebook} alt={'Facebook link'} />
-                </IconButton>
-            </aside>
+            {location.pathname === '/' && (
+                <aside className={classes.socials}>
+                    <IconButton>
+                        <img height={'32px'} src={whatsapp} alt={'Whatsapp link'} />
+                    </IconButton>
+                    <br />
+                    <IconButton>
+                        <img height={'32px'} src={twitter} alt={'Twitter link'} />
+                    </IconButton>
+                    <br />
+                    <IconButton>
+                        <img height={'32px'} src={facebook} alt={'Facebook link'} />
+                    </IconButton>
+                </aside>
+            )}
 
             <Grid container alignItems={'center'} justify={'space-between'}>
                 <Grid item md={3}>
@@ -195,4 +196,4 @@ const Header = () => {
     );
 };
 
-export default Header;
+export default withRouter(Header);
