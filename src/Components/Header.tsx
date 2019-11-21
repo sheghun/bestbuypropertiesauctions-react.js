@@ -1,5 +1,5 @@
-import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import React, {useEffect, useRef, useState} from 'react';
+import {makeStyles, useTheme} from '@material-ui/core/styles';
 import backgroundImage from '../assets/images/sidebackground.svg';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
@@ -9,8 +9,10 @@ import {NavLink} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import twitter from '../assets/icons/twitter.svg';
 import whatsapp from '../assets/icons/whatsapp.svg';
+import classNames from 'classnames';
 import facebook from '../assets/icons/facebook.svg';
 import IconButton from '@material-ui/core/IconButton';
+import useMediaQuery from '@material-ui/core/useMediaQuery/useMediaQuery';
 
 const useStyles = makeStyles(theme => ({
     backgroundImage: {
@@ -47,6 +49,20 @@ const useStyles = makeStyles(theme => ({
             color: 'gray !important',
             borderBottom: 'solid 1px black',
         },
+        [theme.breakpoints.down('sm')]: {
+            marginTop: '2rem',
+        },
+    },
+    navLinkContainer: {
+        transition: 'all .5s ease-in-out',
+    },
+    mobileNavLinkEffect: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        justifyContent: 'center',
+        zIndex: 1000,
     },
     activeNavLink: {
         borderBottom: 'solid 1px black',
@@ -62,7 +78,53 @@ const useStyles = makeStyles(theme => ({
 
 const Header = () => {
     const classes = useStyles();
+    const theme = useTheme();
+    const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const [hangToTop, setHangToTop] = useState(false);
+    const navLinkContainerEl = useRef();
+
+    // Decided whether to hang the nav to the top
+    // A work around so as not to use the hang state in useEffect
+    // This function will get the latest current state
+    const hangTop = (hang: boolean) => {
+        console.log(hang);
+        if (hang && hangToTop) {
+            return;
+        } else if (hang && !hangToTop) {
+            setHangToTop(true);
+        } else if (!hang && !hangToTop) {
+            return;
+        } else if (!hang && hangToTop) {
+            setHangToTop(false);
+        }
+    };
+
+    useEffect(() => {
+        window.onscroll = () => {
+            const offset = window.pageYOffset;
+            if (smallScreen) {
+                if (
+                    // @ts-ignore
+                    offset > navLinkContainerEl.current.offsetTop ||
+                    // @ts-ignore
+                    offset === navLinkContainerEl.current.offsetTop
+                ) {
+                    hangTop(true);
+                }
+                console.log(offset);
+                // @ts-ignore
+                if (offset < 100) {
+                    console.log(offset);
+                    setHangToTop(false);
+                }
+            }
+        };
+        return () => {
+            window.onscroll = null;
+        };
+    }, [smallScreen]);
+    console.log(hangToTop);
     return (
         <>
             <img
@@ -84,55 +146,57 @@ const Header = () => {
                 </IconButton>
             </aside>
 
-            <Hidden smDown={true}>
-                <Grid container alignItems={'center'} justify={'space-between'}>
-                    <Grid item md={3}>
-                        <img
-                            alt={'Bestbuy properties auctions logo'}
-                            className={classes.logo}
-                            src={logo}
-                        />
-                    </Grid>
-                    <Grid item md={4} component={'form'} onSubmit={() => alert('submite')}>
-                        <TextField fullWidth label={'Enter your search here'} />
-                    </Grid>
-                    <Grid item md={3}>
-                        <Grid container>
-                            <Grid item xs={3}>
-                                <Typography variant={'h6'} className={classes.navLinks}>
-                                    <NavLink to={'/'} exact activeClassName={classes.activeNavLink}>
-                                        Home
-                                    </NavLink>
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Typography variant={'h6'} className={classes.navLinks}>
-                                    <NavLink to={'/shop'} activeClassName={classes.activeNavLink}>
-                                        Shop
-                                    </NavLink>
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Typography variant={'h6'} className={classes.navLinks}>
-                                    <NavLink
-                                        to={'/contact'}
-                                        activeClassName={classes.activeNavLink}
-                                    >
-                                        Contact
-                                    </NavLink>
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Typography variant={'h6'} className={classes.navLinks}>
-                                    <NavLink to={'/about'} activeClassName={classes.activeNavLink}>
-                                        About
-                                    </NavLink>
-                                </Typography>
-                            </Grid>
+            <Grid container alignItems={'center'} justify={'space-between'}>
+                <Grid item md={3}>
+                    <img
+                        alt={'Bestbuy properties auctions logo'}
+                        className={classes.logo}
+                        src={logo}
+                    />
+                </Grid>
+                <Grid item xs={12} md={4} component={'form'} onSubmit={() => alert('submit')}>
+                    <TextField fullWidth label={'Search for a property'} />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Grid
+                        container
+                        innerRef={navLinkContainerEl}
+                        className={classNames({
+                            [classes.navLinkContainer]: true,
+                            [classes.mobileNavLinkEffect]: hangToTop,
+                        })}
+                    >
+                        <Grid item xs={3}>
+                            <Typography variant={'h6'} className={classes.navLinks}>
+                                <NavLink to={'/'} exact activeClassName={classes.activeNavLink}>
+                                    Home
+                                </NavLink>
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Typography variant={'h6'} className={classes.navLinks}>
+                                <NavLink to={'/shop'} activeClassName={classes.activeNavLink}>
+                                    Shop
+                                </NavLink>
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Typography variant={'h6'} className={classes.navLinks}>
+                                <NavLink to={'/contact'} activeClassName={classes.activeNavLink}>
+                                    Contact
+                                </NavLink>
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Typography variant={'h6'} className={classes.navLinks}>
+                                <NavLink to={'/about'} activeClassName={classes.activeNavLink}>
+                                    About
+                                </NavLink>
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Hidden>
+            </Grid>
 
             <Grid container className={classes.heroText}>
                 <Grid item xs={12}>

@@ -23,6 +23,8 @@ const useStyles = makeStyles(theme => ({
         [theme.breakpoints.down('sm')]: {
             flexDirection: 'column',
             alignItems: 'center',
+            backgroundColor: '#4E4E4E',
+            paddingTop: '1rem',
         },
     },
     backgroundImage: {
