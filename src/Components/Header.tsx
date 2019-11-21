@@ -68,12 +68,6 @@ const useStyles = makeStyles(theme => ({
         borderBottom: 'solid 1px black',
         color: 'gray',
     },
-    heroText: {
-        marginTop: '4rem',
-        [theme.breakpoints.down('xs')]: {
-            padding: `${theme.spacing(2)}px ${theme.spacing(6)}px`,
-        },
-    },
 }));
 
 const Header = () => {
@@ -101,21 +95,22 @@ const Header = () => {
     };
 
     useEffect(() => {
+        // @ts-ignore
+        const navLinkOffset = navLinkContainerEl.current.offsetTop;
         window.onscroll = () => {
             const offset = window.pageYOffset;
             if (smallScreen) {
                 if (
                     // @ts-ignore
-                    offset > navLinkContainerEl.current.offsetTop ||
+                    offset > navLinkOffset ||
                     // @ts-ignore
-                    offset === navLinkContainerEl.current.offsetTop
+                    offset === navLinkOffset
                 ) {
                     hangTop(true);
                 }
                 console.log(offset);
                 // @ts-ignore
-                if (offset < 100) {
-                    console.log(offset);
+                if (offset < navLinkOffset) {
                     setHangToTop(false);
                 }
             }
@@ -124,7 +119,6 @@ const Header = () => {
             window.onscroll = null;
         };
     }, [smallScreen]);
-    console.log(hangToTop);
     return (
         <>
             <img
@@ -195,22 +189,6 @@ const Header = () => {
                             </Typography>
                         </Grid>
                     </Grid>
-                </Grid>
-            </Grid>
-
-            <Grid container className={classes.heroText}>
-                <Grid item xs={12}>
-                    <Typography variant={'h4'} align={'center'}>
-                        Welcome To Bestbuy Properties Auctions
-                        <br />
-                        <Typography variant={'subtitle1'} align={'center'}>
-                            Fast Auctions of moveable and immoveable properties of
-                            <br />
-                            all descriptions, tangible and intangible.
-                        </Typography>
-                        <br />
-                        <br />
-                    </Typography>
                 </Grid>
             </Grid>
         </>

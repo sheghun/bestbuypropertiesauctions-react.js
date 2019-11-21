@@ -17,6 +17,12 @@ const useStyles = makeStyles(theme => ({
             padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
         },
     },
+    heroText: {
+        marginTop: '4rem',
+        [theme.breakpoints.down('xs')]: {
+            padding: `${theme.spacing(2)}px ${theme.spacing(6)}px`,
+        },
+    },
     featuredProducts: {
         marginTop: '1rem',
     },
@@ -69,6 +75,22 @@ const Home = () => {
         <>
             <main className={classes.root}>
                 <Header />
+                <Grid container className={classes.heroText}>
+                    <Grid item xs={12}>
+                        <Typography variant={'h4'} align={'center'}>
+                            Welcome To Bestbuy Properties Auctions
+                            <br />
+                            <Typography variant={'subtitle1'} align={'center'}>
+                                Fast Auctions of moveable and immoveable properties of
+                                <br />
+                                all descriptions, tangible and intangible.
+                            </Typography>
+                            <br />
+                            <br />
+                        </Typography>
+                    </Grid>
+                </Grid>
+
                 <Grid container className={classes.featuredProducts}>
                     <Grid item xs={12} className={classes.featuredProductsText}>
                         <Typography variant={'h5'} align={'center'}>
