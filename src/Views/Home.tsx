@@ -6,6 +6,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import FeaturedCards from '../Components/FeaturedCards';
+import Footer from '../Components/Footer';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -50,45 +52,66 @@ const Home = () => {
         }, 1000);
     }, []);
     return (
-        <main className={classes.root}>
-            <Header />
-            <Grid container className={classes.featuredProducts}>
-                <Grid item xs={12} className={classes.featuredProductsText}>
-                    <Typography variant={'h5'} align={'center'}>
-                        Featured Products
-                    </Typography>
-                </Grid>
-                {products.map((product, i) => (
-                    <Grid item key={i} md={4}>
-                        <FeaturedCards
-                            title={product.title}
-                            description={product.description}
-                            index={i}
-                            id={i}
-                        />
+        <>
+            <main className={classes.root}>
+                <Header />
+                <Grid container className={classes.featuredProducts}>
+                    <Grid item xs={12} className={classes.featuredProductsText}>
+                        <Typography variant={'h5'} align={'center'}>
+                            Featured Products
+                        </Typography>
                     </Grid>
-                ))}
-                <Grid item xs={12}>
-                    <br />
-                    <br />
-                    <Typography variant={'h6'}>Top Deals</Typography>
-                    <Divider />
-                </Grid>
-                <Grid item xs={12}>
-                    <Grid container justify={'space-between'} className={classes.topDeals}>
-                        {products.map((product, i) => (
-                            <Grid item md={3}>
-                                <Card
-                                    title={product.title}
-                                    description={product.description}
-                                    id={i}
-                                />
+                    {products.map((product, i) => (
+                        <Grid item key={i} md={4}>
+                            <FeaturedCards
+                                title={product.title}
+                                description={product.description}
+                                index={i}
+                                id={i}
+                            />
+                        </Grid>
+                    ))}
+                    <Grid item xs={12}>
+                        <br />
+                        <br />
+                        <Typography variant={'h6'}>Top Deals</Typography>
+                        <Divider />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Grid container justify={'space-between'} className={classes.topDeals}>
+                            {products.map((product, i) => (
+                                <Grid item key={i} md={3}>
+                                    <Card
+                                        title={product.title}
+                                        description={product.description}
+                                        id={i}
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12} style={{marginTop: '4rem'}}>
+                        <Grid container justify={'center'}>
+                            <Grid item xs={12}>
+                                <Typography variant={'body2'} align={'center'}>
+                                    View More
+                                </Typography>
                             </Grid>
-                        ))}
+                            <br />
+                            <br />
+                            <Grid item xs={12}>
+                                <Typography align={'center'}>
+                                    <Button variant={'contained'} color={'primary'}>
+                                        Products Page
+                                    </Button>
+                                </Typography>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </main>
+            </main>
+            <Footer />
+        </>
     );
 };
 
