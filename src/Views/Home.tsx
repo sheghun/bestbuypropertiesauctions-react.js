@@ -11,8 +11,11 @@ import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
     root: {
-        maxWidth: '100vw',
+        width: '100vw',
         padding: `${theme.spacing(4)}px ${theme.spacing(8)}px`,
+        [theme.breakpoints.down('xs')]: {
+            padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
+        },
     },
     featuredProducts: {
         marginTop: '1rem',
@@ -22,6 +25,17 @@ const useStyles = makeStyles(theme => ({
     },
     topDeals: {
         marginTop: '4rem',
+    },
+    [theme.breakpoints.down('md')]: {
+        featuredProducts: {
+            justifyContent: 'center',
+        },
+        topDeals: {
+            justifyContent: 'center',
+        },
+    },
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(2),
     },
 }));
 
@@ -62,7 +76,7 @@ const Home = () => {
                         </Typography>
                     </Grid>
                     {products.map((product, i) => (
-                        <Grid item key={i} md={4}>
+                        <Grid item key={i} xs={12} md={4}>
                             <FeaturedCards
                                 title={product.title}
                                 description={product.description}

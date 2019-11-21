@@ -7,7 +7,10 @@ import logo from '../assets/images/bestbuyproperties-default-logo.png';
 import TextField from '@material-ui/core/TextField';
 import {NavLink} from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import twitter from '../assets/icons/twitter.svg';
+import whatsapp from '../assets/icons/whatsapp.svg';
+import facebook from '../assets/icons/facebook.svg';
+import IconButton from '@material-ui/core/IconButton';
 
 const useStyles = makeStyles(theme => ({
     backgroundImage: {
@@ -16,6 +19,20 @@ const useStyles = makeStyles(theme => ({
         left: '-1.2rem',
         top: '-1.2rem',
         zIndex: -1,
+        [theme.breakpoints.down('xs')]: {
+            marginTop: '-3rem',
+            width: '100vw',
+        },
+    },
+    socials: {
+        position: 'fixed',
+        top: '30vh',
+        right: '2rem',
+        zIndex: 10,
+        [theme.breakpoints.down('xs')]: {
+            position: 'absolute',
+            right: '1rem',
+        },
     },
     logo: {
         height: '64px',
@@ -37,6 +54,9 @@ const useStyles = makeStyles(theme => ({
     },
     heroText: {
         marginTop: '4rem',
+        [theme.breakpoints.down('xs')]: {
+            padding: `${theme.spacing(2)}px ${theme.spacing(6)}px`,
+        },
     },
 }));
 
@@ -50,6 +70,19 @@ const Header = () => {
                 src={backgroundImage}
                 className={classes.backgroundImage}
             />
+            <aside className={classes.socials}>
+                <IconButton>
+                    <img height={'32px'} src={whatsapp} alt={'Whatsapp link'} />
+                </IconButton>
+                <br />
+                <IconButton>
+                    <img height={'32px'} src={twitter} alt={'Twitter link'} />
+                </IconButton>
+                <br />
+                <IconButton>
+                    <img height={'32px'} src={facebook} alt={'Facebook link'} />
+                </IconButton>
+            </aside>
 
             <Hidden smDown={true}>
                 <Grid container alignItems={'center'} justify={'space-between'}>
