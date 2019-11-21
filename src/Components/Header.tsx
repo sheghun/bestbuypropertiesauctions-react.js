@@ -65,14 +65,21 @@ const Header = () => {
                     </Grid>
                     <Grid item md={3}>
                         <Grid container>
-                            <Grid item xs={4}>
+                            <Grid item xs={3}>
                                 <Typography variant={'h6'} className={classes.navLinks}>
                                     <NavLink to={'/'} exact activeClassName={classes.activeNavLink}>
                                         Home
                                     </NavLink>
                                 </Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={3}>
+                                <Typography variant={'h6'} className={classes.navLinks}>
+                                    <NavLink to={'/shop'} activeClassName={classes.activeNavLink}>
+                                        Shop
+                                    </NavLink>
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={3}>
                                 <Typography variant={'h6'} className={classes.navLinks}>
                                     <NavLink
                                         to={'/contact'}
@@ -82,7 +89,7 @@ const Header = () => {
                                     </NavLink>
                                 </Typography>
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={3}>
                                 <Typography variant={'h6'} className={classes.navLinks}>
                                     <NavLink to={'/about'} activeClassName={classes.activeNavLink}>
                                         About
