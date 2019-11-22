@@ -6,6 +6,7 @@ import {Route} from 'react-router-dom';
 import Home from './Views/Home';
 import About from './Views/About';
 import Contact from './Views/Contact';
+import Shop from './Views/Shop';
 
 const App: React.FC = () => {
     return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
                 <Route exact path={'/'} component={Home} />
                 <Route exact path={'/about'} component={About} />
                 <Route exact path={'/contact'} component={Contact} />
+                <Route exact path={'/shop'} component={Shop} />
             </ThemeProvider>
         </>
     );

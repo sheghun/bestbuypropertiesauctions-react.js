@@ -20,6 +20,9 @@ const useStyles = makeStyles(theme => ({
     },
     cardContent: {
         padding: `${theme.spacing(4)}px ${theme.spacing(8)}px`,
+        [theme.breakpoints.down('sm')]: {
+            padding: `${theme.spacing(4)}px ${theme.spacing(4)}px`,
+        },
     },
     cardActions: {
         paddingBottom: theme.spacing(4),
@@ -46,6 +49,9 @@ export default function MediaCard({title, description, id, ...props}: Props) {
                 <Typography gutterBottom variant="h5" component="h2">
                     {title}
                 </Typography>
+                <Typography gutterBottom variant="h5" component="h2">
+                    73K
+                </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     {description}
                 </Typography>
@@ -53,7 +59,7 @@ export default function MediaCard({title, description, id, ...props}: Props) {
             <CardActions className={classes.cardActions}>
                 <Grid container justify={'center'}>
                     <Button size="medium" variant={'contained'} color="primary">
-                        Share
+                        View
                     </Button>
                 </Grid>
             </CardActions>
