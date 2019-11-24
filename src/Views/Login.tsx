@@ -5,13 +5,14 @@ import Logo from '../Components/Logo';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
     root: {
         width: '100vw',
         height: '100vh',
+        padding: theme.spacing(2),
         display: 'flex',
         alignItems: 'center',
         backgroundColor: 'white',
@@ -37,8 +38,8 @@ const Login = () => {
     return (
         <div className={classes.root}>
             <div className={classes.homeLink}>
-                <Link>
-                <Typography variant={'h6'}>Home</Typography>
+                <Link to={'/'}>
+                    <Typography variant={'h6'}>Home</Typography>
                 </Link>
             </div>
             <Grid
@@ -53,6 +54,7 @@ const Login = () => {
                 </Grid>
                 <Grid item xs={12}>
                     <Typography align={'center'} variant={'h5'}>
+                        <br />
                         Admin Login
                     </Typography>
                 </Grid>
