@@ -21,7 +21,7 @@ const App: React.FC = () => {
                 <Route exact path={'/about'} component={About} />
                 <Route exact path={'/contact'} component={Contact} />
                 <Route exact path={'/shop'} component={Shop} />
-                <Route path={'/admin/tl/login'} component={Admin} />
+                <Route path={'/admin'} component={Admin} />
             </ThemeProvider>
         </>
     );

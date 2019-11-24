@@ -1,16 +1,20 @@
 // @flow
 import * as React from 'react';
-import {Route} from 'react-router';
+import {Route, RouteComponentProps} from 'react-router';
 import loadable from '@loadable/component';
 import LoadingPage from '../Components/LoadingPage';
 
-const Login = loadable(() => import('../Views/Login'), {fallback: <LoadingPage />});
+const Login = loadable(() => import('../Views/Admin/Login'), {fallback: <LoadingPage />});
+const Overview = loadable(() => import('../Views/Admin/Overview'), {fallback: <LoadingPage />});
 
-type Props = {};
-const Admin = (props: Props) => {
+const Admin = ({match}: RouteComponentProps) => {
     return (
         <>
-            <Route path={'/admin/tl/login'} component={Login} />
+            {match.url === '/admin/tl/login' ? (
+                <Route component={Login} />
+            ) : (
+                <Route path={'/admin/tl/overview'} component={Overview} />
+            )}
         </>
     );
 };
