@@ -1,8 +1,6 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/core/styles';
 import Card from './Card';
 import styled, {keyframes} from 'styled-components';
-import Typography from '@material-ui/core/Typography';
 
 const slide = keyframes`
   from {

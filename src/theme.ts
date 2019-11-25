@@ -6,9 +6,11 @@ const theme = createMuiTheme({
         error: red,
         primary: {
             main: '#3e933a',
+            dark: '#2d3832',
         },
         secondary: {
             main: '#808080',
+            dark: '#4d4d4d',
         },
     },
     typography: {

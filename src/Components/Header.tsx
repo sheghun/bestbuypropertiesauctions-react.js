@@ -117,7 +117,7 @@ const Header = ({location}: RouteComponentProps) => {
         return () => {
             window.onscroll = null;
         };
-    }, [smallScreen]);
+    }, [smallScreen, hangTop]);
     return (
         <>
             <img
