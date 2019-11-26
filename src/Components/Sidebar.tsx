@@ -42,10 +42,9 @@ const useStyles = makeStyles(theme => ({
 
 const links = [
     {path: '/admin/tl/overview', title: 'Overview'},
-    {path: '/admin/tl/products', title: 'Products'},
     {path: '/admin/tl/products/add', title: 'Add Product'},
     {path: '/admin/tl/products/edit', title: 'Edit Product'},
-    {path: '/admin/tl/categories/edit', title: 'Categories'},
+    {path: '/admin/tl/categories', title: 'Categories'},
 ];
 
 const Sidebar = () => {
