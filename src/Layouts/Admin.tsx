@@ -9,6 +9,7 @@ import {makeStyles} from '@material-ui/core/styles';
 
 const Login = loadable(() => import('../Views/Admin/Login'), {fallback: <LoadingPage />});
 const Overview = loadable(() => import('../Views/Admin/Overview'), {fallback: <LoadingPage />});
+const Products = loadable(() => import('../Views/Admin/Products'), {fallback: <LoadingPage />});
 
 const useStyles = makeStyles(() => ({
     '@global': {
@@ -36,6 +37,7 @@ const Admin = ({match}: RouteComponentProps) => {
                     </Grid>
                     <Grid item md={9} sm={8} className={classes.pagesGrid}>
                         <Route path={'/admin/tl/overview'} component={Overview} />
+                        <Route path={'/admin/tl/products'} component={Products} />
                     </Grid>
                 </Grid>
             )}
