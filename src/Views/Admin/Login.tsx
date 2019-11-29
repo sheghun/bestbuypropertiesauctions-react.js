@@ -5,8 +5,10 @@ import Logo from '../../Components/Logo';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import {Link} from 'react-router-dom';
+import {Link, RouteComponentProps} from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import axios, {AxiosError} from 'axios';
+import Snackbar from '../../Components/Snackbar';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,19 +26,54 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Login = () => {
+const Login = ({history}: RouteComponentProps) => {
     const classes = useStyles();
 
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        variant: 'success',
+    });
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        alert('submited');
+        setLoading(true);
+
+        try {
+            const d = {email, password};
+            const {status, data} = await axios.post('/admin/login', d);
+            if (status === 200 && data.status === 'success') {
+                setSnackbar({open: true, variant: 'success', message: 'Sign in Successful'});
+                setTimeout(() => {
+                    history.push('/admin/tl/overview');
+                }, 3000);
+            }
+        } catch (e) {
+            const {response} = e as AxiosError;
+            if (response) {
+                if (response.status === 401) {
+                    setSnackbar({
+                        open: true,
+                        variant: 'error',
+                        message: 'Email or Password incorrect',
+                    });
+                }
+            }
+        }
+        setLoading(false);
     };
 
     return (
         <div className={classes.root}>
+            <Snackbar
+                variant={snackbar.variant as any}
+                open={snackbar.open}
+                message={snackbar.message}
+                onClose={() => setSnackbar(s => ({...s, open: false}))}
+            />
             <div className={classes.homeLink}>
                 <Link to={'/'}>
                     <Typography variant={'h6'}>Home</Typography>
@@ -83,8 +120,14 @@ const Login = () => {
                 </Grid>
                 <Grid item xs={12} />
                 <Grid item xs={8} sm={3} style={{marginTop: '4rem'}}>
-                    <Button fullWidth type={'submit'} color={'primary'} variant={'contained'}>
-                        Login
+                    <Button
+                        fullWidth
+                        type={'submit'}
+                        color={'primary'}
+                        variant={'contained'}
+                        disabled={loading}
+                    >
+                        {loading ? <CircularProgress /> : 'Login'}
                     </Button>
                 </Grid>
             </Grid>

@@ -23,12 +23,12 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const Admin = ({match}: RouteComponentProps) => {
+const Admin = ({location}: RouteComponentProps) => {
     const classes = useStyles();
 
     return (
         <>
-            {match.url === '/admin/tl/login' ? (
+            {location.pathname.includes('/admin/tl/login') ? (
                 <Route component={Login} />
             ) : (
                 <Grid container>
