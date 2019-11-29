@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -10,6 +10,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
+import classnames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import {Route, RouteComponentProps} from 'react-router';
@@ -27,6 +28,9 @@ const useStyles = makeStyles(theme => ({
     selectLabel: {
         paddingLeft: theme.spacing(2),
     },
+    bigAvatar: {
+        width: '100%',
+    },
 }));
 
 const Products = () => {
@@ -40,6 +44,31 @@ const Products = () => {
 
 const AddProduct = (props: RouteComponentProps) => {
     const classes = useStyles();
+
+    const [name, setName] = useState('');
+    const [price, setPrice] = useState('');
+    const [description, setDescription] = useState('');
+    const [condition, setCondition] = useState('');
+    const [size, setSize] = useState('');
+    const [year, setYear] = useState('');
+    const [transmission, setTransimission] = useState('');
+    const [images, setImages] = useState(([] as any) as Array<File>);
+    const [imageSources, setImageSources] = useState([] as Array<string>);
+    const [featuredImage, setFeaturedImage] = useState((null as any) as File);
+
+    // Images element references
+    const image1 = useRef() as {current: HTMLInputElement | null};
+    const image2 = useRef() as {current: HTMLInputElement | null};
+    const image3 = useRef() as {current: HTMLInputElement | null};
+    const image4 = useRef() as {current: HTMLInputElement | null};
+
+    const previewImages = (imageNumber: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = (e.target.files && e.target.files[0]) as File;
+        const url = URL.createObjectURL(file);
+        setImageSources(img => [...img, url]);
+        setImages(imgFile => [...imgFile, file]);
+    };
+
 
     return (
         <>
@@ -59,10 +88,21 @@ const AddProduct = (props: RouteComponentProps) => {
                     className={classes.productsInputsWrapper}
                 >
                     <Grid item xs={12}>
-                        <TextField fullWidth placeholder={'Product Name'} variant={'filled'} />
+                        <TextField
+                            fullWidth
+                            placeholder={'Product Name'}
+                            variant={'filled'}
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                        />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField placeholder={'Product Price'} variant={'filled'} />
+                        <TextField
+                            placeholder={'Product Price'}
+                            variant={'filled'}
+                            name={price}
+                            onChange={e => setPrice(e.target.value)}
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -71,36 +111,106 @@ const AddProduct = (props: RouteComponentProps) => {
                             multiline
                             rows={'8'}
                             variant={'filled'}
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
                         />
                     </Grid>
-                    <Grid item xs={12} container>
+                    <Grid item xs={12} container alignItems={'baseline'}>
                         <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
+                            {imageSources[0] ? (
+                                <img
+                                    src={imageSources[0]}
+                                    className={classes.bigAvatar}
+                                    alt={name}
+                                />
+                            ) : (
+                                <Avatar>
+                                    <IconButton
+                                        onClick={() => image1.current && image1.current.click()}
+                                    >
+                                        <AddIcon />
+                                        <input
+                                            type={'file'}
+                                            accept={'image/*'}
+                                            style={{display: 'none'}}
+                                            onChange={previewImages('image1')}
+                                            ref={image1}
+                                        />
+                                    </IconButton>
+                                </Avatar>
+                            )}
                         </Grid>
                         <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
+                            {imageSources[1] ? (
+                                <img
+                                    src={imageSources[1]}
+                                    className={classes.bigAvatar}
+                                    alt={name}
+                                />
+                            ) : (
+                                <Avatar>
+                                    <IconButton>
+                                        <AddIcon
+                                            onClick={() => image2.current && image2.current.click()}
+                                        />
+                                        <input
+                                            type={'file'}
+                                            accept={'image/*'}
+                                            style={{display: 'none'}}
+                                            onChange={previewImages('image')}
+                                            ref={image2}
+                                        />
+                                    </IconButton>
+                                </Avatar>
+                            )}
                         </Grid>
                         <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
+                            {imageSources[2] ? (
+                                <img
+                                    src={imageSources[2]}
+                                    className={classes.bigAvatar}
+                                    alt={name}
+                                />
+                            ) : (
+                                <Avatar>
+                                    <IconButton>
+                                        <AddIcon
+                                            onClick={() => image3.current && image3.current.click()}
+                                        />
+                                        <input
+                                            type={'file'}
+                                            accept={'image/*'}
+                                            style={{display: 'none'}}
+                                            onChange={previewImages('image')}
+                                            ref={image3}
+                                        />
+                                    </IconButton>
+                                </Avatar>
+                            )}
                         </Grid>
                         <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
+                            {imageSources[3] ? (
+                                <img
+                                    src={imageSources[3]}
+                                    className={classes.bigAvatar}
+                                    alt={name}
+                                />
+                            ) : (
+                                <Avatar>
+                                    <IconButton>
+                                        <AddIcon
+                                            onClick={() => image4.current && image4.current.click()}
+                                        />
+                                        <input
+                                            type={'file'}
+                                            accept={'image/*'}
+                                            style={{display: 'none'}}
+                                            onChange={previewImages('image')}
+                                            ref={image4}
+                                        />
+                                    </IconButton>
+                                </Avatar>
+                            )}
                         </Grid>
                     </Grid>
                     <Grid item xs={12}>
