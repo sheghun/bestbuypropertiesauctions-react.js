@@ -6,8 +6,8 @@ import LoadingPage from '../Components/LoadingPage';
 import Sidebar from '../Components/Sidebar';
 import Grid from '@material-ui/core/Grid';
 import {makeStyles} from '@material-ui/core/styles';
+import {AdminContext} from "../Context";
 
-const Login = loadable(() => import('../Views/Admin/Login'), {fallback: <LoadingPage />});
 const Overview = loadable(() => import('../Views/Admin/Overview'), {fallback: <LoadingPage />});
 const Products = loadable(() => import('../Views/Admin/Products'), {fallback: <LoadingPage />});
 
@@ -28,19 +28,15 @@ const Admin = ({location}: RouteComponentProps) => {
 
     return (
         <>
-            {location.pathname.includes('/admin/tl/login') ? (
-                <Route component={Login} />
-            ) : (
-                <Grid container>
-                    <Grid item style={{width: 250}}>
-                        <Sidebar />
-                    </Grid>
-                    <Grid item md={9} sm={8} className={classes.pagesGrid}>
-                        <Route path={'/admin/tl/overview'} component={Overview} />
-                        <Route path={'/admin/tl/products'} component={Products} />
-                    </Grid>
+            <Grid container>
+                <Grid item style={{width: 250}}>
+                    <Sidebar />
                 </Grid>
-            )}
+                <Grid item md={9} sm={8} className={classes.pagesGrid}>
+                    <Route path={'/admin/tl/overview'} component={Overview} />
+                    <Route path={'/admin/tl/products'} component={Products} />
+                </Grid>
+            </Grid>
         </>
     );
 };
