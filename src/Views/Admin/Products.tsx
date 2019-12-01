@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
         height: '600px',
     },
     selectLabel: {
-        paddingLeft: theme.spacing(2),
+        // paddingLeft: theme.spacing(2),
     },
     bigAvatar: {
         width: '100%',
@@ -52,15 +52,17 @@ const AddProduct = (props: RouteComponentProps) => {
     const [size, setSize] = useState('');
     const [year, setYear] = useState('');
     const [transmission, setTransimission] = useState('');
+    const [category, setCategory] = useState('');
     const [images, setImages] = useState(([] as any) as Array<File>);
     const [imageSources, setImageSources] = useState([] as Array<string>);
     const [featuredImage, setFeaturedImage] = useState((null as any) as File);
 
     // Images element references
-    const image1 = useRef() as {current: HTMLInputElement | null};
-    const image2 = useRef() as {current: HTMLInputElement | null};
-    const image3 = useRef() as {current: HTMLInputElement | null};
-    const image4 = useRef() as {current: HTMLInputElement | null};
+    const image1InputEl = useRef() as {current: HTMLInputElement | null};
+    const image2InputEl = useRef() as {current: HTMLInputElement | null};
+    const image3InputEl = useRef() as {current: HTMLInputElement | null};
+    const image4InputEl = useRef() as {current: HTMLInputElement | null};
+    const featuredImageInputEl = useRef() as {current: HTMLInputElement | null};
 
     const previewImages = (imageNumber: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = (e.target.files && e.target.files[0]) as File;
@@ -69,14 +71,44 @@ const AddProduct = (props: RouteComponentProps) => {
         setImages(imgFile => [...imgFile, file]);
     };
 
+    const onChangeFeaturedImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = (e.target.files && e.target.files[0]) as File;
+        setFeaturedImage(file);
+    };
 
     return (
         <>
-            <Grid container className={classes.gridWrapper} justify={'space-between'}>
+            <Grid
+                container
+                className={classes.gridWrapper}
+                justify={'space-between'}
+                component={'form'}
+            >
                 <Grid item xs={12} className={classes.heading}>
                     <Typography variant={'h5'} align={'center'}>
                         Add A New Product
                     </Typography>
+                </Grid>
+                <Grid item xs={12} container justify={'center'}>
+                    {featuredImage && (
+                        <img height={'300px'} alt={name} src={URL.createObjectURL(featuredImage)} />
+                    )}
+                    <input
+                        type={'file'}
+                        accept={'image/*'}
+                        ref={featuredImageInputEl}
+                        onChange={onChangeFeaturedImage}
+                        style={{display: 'none'}}
+                    />
+                    <Button
+                        color={'primary'}
+                        fullWidth
+                        onClick={() =>
+                            featuredImageInputEl.current && featuredImageInputEl.current.click()
+                        }
+                    >
+                        Upload featured image of the product
+                    </Button>
                 </Grid>
                 <Grid
                     item
@@ -90,16 +122,17 @@ const AddProduct = (props: RouteComponentProps) => {
                     <Grid item xs={12}>
                         <TextField
                             fullWidth
+                            required
                             placeholder={'Product Name'}
-                            variant={'filled'}
                             value={name}
                             onChange={e => setName(e.target.value)}
                         />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
+                            required
                             placeholder={'Product Price'}
-                            variant={'filled'}
+                            fullWidth
                             name={price}
                             onChange={e => setPrice(e.target.value)}
                         />
@@ -107,10 +140,10 @@ const AddProduct = (props: RouteComponentProps) => {
                     <Grid item xs={12}>
                         <TextField
                             fullWidth
+                            required
                             placeholder={'Product Description'}
                             multiline
                             rows={'8'}
-                            variant={'filled'}
                             value={description}
                             onChange={e => setDescription(e.target.value)}
                         />
@@ -126,15 +159,17 @@ const AddProduct = (props: RouteComponentProps) => {
                             ) : (
                                 <Avatar>
                                     <IconButton
-                                        onClick={() => image1.current && image1.current.click()}
+                                        onClick={() =>
+                                            image1InputEl.current && image1InputEl.current.click()
+                                        }
                                     >
                                         <AddIcon />
                                         <input
                                             type={'file'}
                                             accept={'image/*'}
                                             style={{display: 'none'}}
-                                            onChange={previewImages('image1')}
-                                            ref={image1}
+                                            onChange={previewImages('image1InputEl')}
+                                            ref={image1InputEl}
                                         />
                                     </IconButton>
                                 </Avatar>
@@ -151,14 +186,17 @@ const AddProduct = (props: RouteComponentProps) => {
                                 <Avatar>
                                     <IconButton>
                                         <AddIcon
-                                            onClick={() => image2.current && image2.current.click()}
+                                            onClick={() =>
+                                                image2InputEl.current &&
+                                                image2InputEl.current.click()
+                                            }
                                         />
                                         <input
                                             type={'file'}
                                             accept={'image/*'}
                                             style={{display: 'none'}}
                                             onChange={previewImages('image')}
-                                            ref={image2}
+                                            ref={image2InputEl}
                                         />
                                     </IconButton>
                                 </Avatar>
@@ -175,14 +213,17 @@ const AddProduct = (props: RouteComponentProps) => {
                                 <Avatar>
                                     <IconButton>
                                         <AddIcon
-                                            onClick={() => image3.current && image3.current.click()}
+                                            onClick={() =>
+                                                image3InputEl.current &&
+                                                image3InputEl.current.click()
+                                            }
                                         />
                                         <input
                                             type={'file'}
                                             accept={'image/*'}
                                             style={{display: 'none'}}
                                             onChange={previewImages('image')}
-                                            ref={image3}
+                                            ref={image3InputEl}
                                         />
                                     </IconButton>
                                 </Avatar>
@@ -199,14 +240,17 @@ const AddProduct = (props: RouteComponentProps) => {
                                 <Avatar>
                                     <IconButton>
                                         <AddIcon
-                                            onClick={() => image4.current && image4.current.click()}
+                                            onClick={() =>
+                                                image4InputEl.current &&
+                                                image4InputEl.current.click()
+                                            }
                                         />
                                         <input
                                             type={'file'}
                                             accept={'image/*'}
                                             style={{display: 'none'}}
                                             onChange={previewImages('image')}
-                                            ref={image4}
+                                            ref={image4InputEl}
                                         />
                                     </IconButton>
                                 </Avatar>
@@ -233,7 +277,7 @@ const AddProduct = (props: RouteComponentProps) => {
                             <InputLabel id={'condition-select'} className={classes.selectLabel}>
                                 Condition
                             </InputLabel>
-                            <Select fullWidth variant={'filled'}>
+                            <Select fullWidth>
                                 <MenuItem></MenuItem>
                             </Select>
                             <FormHelperText>
@@ -242,8 +286,18 @@ const AddProduct = (props: RouteComponentProps) => {
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
+                        <FormControl fullWidth>
+                            <InputLabel id={'condition-select'} className={classes.selectLabel}>
+                                Category
+                            </InputLabel>
+                            <Select fullWidth>
+                                <MenuItem></MenuItem>
+                            </Select>
+                            <FormHelperText></FormHelperText>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                         <TextField
-                            variant={'filled'}
                             fullWidth
                             label={'Size'}
                             helperText={'This is for lands and houses'}
@@ -251,28 +305,18 @@ const AddProduct = (props: RouteComponentProps) => {
                     </Grid>
                     <Grid item xs={12} container justify={'space-between'}>
                         <Grid item xs={5}>
-                            <TextField
-                                variant={'filled'}
-                                fullWidth
-                                label={'Year'}
-                                helperText={'This is for cars'}
-                            />
+                            <TextField fullWidth label={'Year'} helperText={'This is for cars'} />
                         </Grid>
                         <Grid item xs={5}>
-                            <TextField variant={'filled'} label={'Transmission'} fullWidth select>
+                            <TextField label={'Transmission'} fullWidth select>
                                 <MenuItem value={'Manual'}>Manual</MenuItem>
                                 <MenuItem value={'Auto'}>Auto</MenuItem>
                             </TextField>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                        <Button color={'primary'} fullWidth>
-                            Upload featured image of the product
-                        </Button>
-                    </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                    <Button color={'primary'} fullWidth variant={'contained'}>
+                <Grid item xs={12} container justify={'center'}>
+                    <Button color={'primary'} variant={'contained'} type={'submit'}>
                         Add Product
                     </Button>
                 </Grid>
@@ -302,10 +346,10 @@ const EditProduct = (props: RouteComponentProps) => {
                     className={classes.productsInputsWrapper}
                 >
                     <Grid item xs={12}>
-                        <TextField fullWidth placeholder={'Product Name'} variant={'filled'} />
+                        <TextField fullWidth placeholder={'Product Name'} />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField placeholder={'Product Price'} variant={'filled'} />
+                        <TextField placeholder={'Product Price'} />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -313,7 +357,6 @@ const EditProduct = (props: RouteComponentProps) => {
                             placeholder={'Product Description'}
                             multiline
                             rows={'8'}
-                            variant={'filled'}
                         />
                     </Grid>
                     <Grid item xs={12} container>
@@ -366,7 +409,7 @@ const EditProduct = (props: RouteComponentProps) => {
                             <InputLabel id={'condition-select'} className={classes.selectLabel}>
                                 Condition
                             </InputLabel>
-                            <Select fullWidth variant={'filled'}>
+                            <Select fullWidth>
                                 <MenuItem></MenuItem>
                             </Select>
                             <FormHelperText>
@@ -376,7 +419,6 @@ const EditProduct = (props: RouteComponentProps) => {
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
-                            variant={'filled'}
                             fullWidth
                             label={'Size'}
                             helperText={'This is for lands and houses'}
@@ -384,15 +426,10 @@ const EditProduct = (props: RouteComponentProps) => {
                     </Grid>
                     <Grid item xs={12} container justify={'space-between'}>
                         <Grid item xs={5}>
-                            <TextField
-                                variant={'filled'}
-                                fullWidth
-                                label={'Year'}
-                                helperText={'This is for cars'}
-                            />
+                            <TextField fullWidth label={'Year'} helperText={'This is for cars'} />
                         </Grid>
                         <Grid item xs={5}>
-                            <TextField variant={'filled'} label={'Transmission'} fullWidth select>
+                            <TextField label={'Transmission'} fullWidth select>
                                 <MenuItem value={'Manual'}>Manual</MenuItem>
                                 <MenuItem value={'Auto'}>Auto</MenuItem>
                             </TextField>
