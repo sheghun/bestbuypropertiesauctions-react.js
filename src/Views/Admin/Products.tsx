@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,6 +14,7 @@ import classnames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import {Route, RouteComponentProps} from 'react-router';
+import {AdminContext} from '../../Context';
 
 const useStyles = makeStyles(theme => ({
     gridWrapper: {
@@ -44,6 +45,8 @@ const Products = () => {
 
 const AddProduct = (props: RouteComponentProps) => {
     const classes = useStyles();
+
+    const {categories} = useContext(AdminContext);
 
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
@@ -291,7 +294,9 @@ const AddProduct = (props: RouteComponentProps) => {
                                 Category
                             </InputLabel>
                             <Select fullWidth>
-                                <MenuItem></MenuItem>
+                                {categories.map(cat => (
+                                    <MenuItem value={cat.id}>{cat.title}</MenuItem>
+                                ))}
                             </Select>
                             <FormHelperText></FormHelperText>
                         </FormControl>
