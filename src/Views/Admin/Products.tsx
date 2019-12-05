@@ -10,11 +10,13 @@ import {makeStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
-import classnames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import {Route, RouteComponentProps} from 'react-router';
 import {AdminContext} from '../../Context';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import axios from 'axios';
+import Snackbar from '../../Components/Snackbar';
 
 const useStyles = makeStyles(theme => ({
     gridWrapper: {
@@ -48,17 +50,28 @@ const AddProduct = (props: RouteComponentProps) => {
 
     const {categories} = useContext(AdminContext);
 
+    const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        variant: 'success',
+    });
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
     const [condition, setCondition] = useState('');
     const [size, setSize] = useState('');
     const [year, setYear] = useState('');
-    const [transmission, setTransimission] = useState('');
+    const [transmission, setTransmission] = useState('');
     const [category, setCategory] = useState('');
     const [images, setImages] = useState(([] as any) as Array<File>);
     const [imageSources, setImageSources] = useState([] as Array<string>);
-    const [featuredImage, setFeaturedImage] = useState((null as any) as File);
+    const [featuredImage, setFeaturedImage] = useState({file: (null as any) as File, src: ''});
+    const [errors, setErrors] = useState({
+        featuredImage: '',
+        category: '',
+        price: '',
+    });
 
     // Images element references
     const image1InputEl = useRef() as {current: HTMLInputElement | null};
@@ -76,16 +89,81 @@ const AddProduct = (props: RouteComponentProps) => {
 
     const onChangeFeaturedImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = (e.target.files && e.target.files[0]) as File;
-        setFeaturedImage(file);
+        if (file) {
+            setFeaturedImage({file, src: URL.createObjectURL(file)});
+        }
     };
 
+    const validate = () => {
+        let pass = true;
+        const err = {} as any;
+        setErrors(err);
+        if (!featuredImage) {
+            pass = false;
+            err.featuredImage = 'Featured image is compulsory';
+        }
+        if (!category) {
+            pass = false;
+            err.category = 'Category is compulsory';
+        }
+        if (isNaN(Number(price))) {
+            pass = false;
+            err.price = 'Price must contain only numbers';
+        }
+        setErrors(err);
+        return pass;
+    };
+
+    const submit = async (e: React.FormEvent<HTMLFormElement> | any) => {
+        e.preventDefault();
+        if (!validate()) return;
+
+        setLoading(true);
+
+        try {
+            const d = {name, price, description, size, year, condition, category, transmission};
+            const productResponse = await axios.post('/admin/products', d); // Upload product details
+            // Check if successful
+            if (productResponse.status === 201 && productResponse.data.status === 'success') {
+                setSnackbar({
+                    open: true,
+                    message: 'Product added uploading images',
+                    variant: 'success',
+                });
+
+                const formData = new FormData(); // Construct formData
+                formData.append('featuredImage', featuredImage.file);
+
+                images.forEach((image, i) => {
+                    formData.append(`image${i + 1}`, image);
+
+                    if (i + 1 === images.length) {
+                        (async () => {
+                            setLoading(true);
+                            formData.append('productId', productResponse.data.data.product.id);
+                            const res = await axios.post('/admin/products/images', formData);
+                            setLoading(false);
+                        })();
+                    }
+                });
+            }
+        } catch (e) {}
+        setLoading(false);
+    };
     return (
         <>
+            <Snackbar
+                variant={snackbar.variant as any}
+                open={snackbar.open}
+                message={snackbar.message}
+                onClose={() => setSnackbar(s => ({...s, open: false}))}
+            />
             <Grid
                 container
                 className={classes.gridWrapper}
                 justify={'space-between'}
                 component={'form'}
+                onSubmit={submit}
             >
                 <Grid item xs={12} className={classes.heading}>
                     <Typography variant={'h5'} align={'center'}>
@@ -93,12 +171,13 @@ const AddProduct = (props: RouteComponentProps) => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} container justify={'center'}>
-                    {featuredImage && (
-                        <img height={'300px'} alt={name} src={URL.createObjectURL(featuredImage)} />
+                    {featuredImage.file && (
+                        <img height={'300px'} alt={name} src={featuredImage.src} />
                     )}
                     <input
                         type={'file'}
                         accept={'image/*'}
+                        required
                         ref={featuredImageInputEl}
                         onChange={onChangeFeaturedImage}
                         style={{display: 'none'}}
@@ -106,12 +185,18 @@ const AddProduct = (props: RouteComponentProps) => {
                     <Button
                         color={'primary'}
                         fullWidth
+                        type={'button'}
                         onClick={() =>
                             featuredImageInputEl.current && featuredImageInputEl.current.click()
                         }
                     >
                         Upload featured image of the product
                     </Button>
+                    {errors.featuredImage && (
+                        <FormControl error={!!errors.featuredImage}>
+                            <FormHelperText>{errors.featuredImage}</FormHelperText>
+                        </FormControl>
+                    )}
                 </Grid>
                 <Grid
                     item
@@ -138,6 +223,8 @@ const AddProduct = (props: RouteComponentProps) => {
                             fullWidth
                             name={price}
                             onChange={e => setPrice(e.target.value)}
+                            error={!!errors.price}
+                            helperText={errors.price}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -280,8 +367,14 @@ const AddProduct = (props: RouteComponentProps) => {
                             <InputLabel id={'condition-select'} className={classes.selectLabel}>
                                 Condition
                             </InputLabel>
-                            <Select fullWidth>
-                                <MenuItem></MenuItem>
+                            <Select
+                                fullWidth
+                                required
+                                onChange={e => setCondition(e.target.value as string)}
+                            >
+                                <MenuItem value={'New'}>New</MenuItem>
+                                <MenuItem value={'Used Like New'}>Used Like New</MenuItem>
+                                <MenuItem value={'Used'}>Used</MenuItem>
                             </Select>
                             <FormHelperText>
                                 This field is for vehicles and usable items
@@ -289,31 +382,49 @@ const AddProduct = (props: RouteComponentProps) => {
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl fullWidth>
+                        <FormControl fullWidth error={!!errors.category}>
                             <InputLabel id={'condition-select'} className={classes.selectLabel}>
                                 Category
                             </InputLabel>
-                            <Select fullWidth>
+                            <Select
+                                fullWidth
+                                required
+                                onChange={e => setCategory(e.target.value as string)}
+                            >
                                 {categories.map(cat => (
-                                    <MenuItem value={cat.id}>{cat.title}</MenuItem>
+                                    <MenuItem key={cat.id} value={cat.id}>
+                                        {cat.title}
+                                    </MenuItem>
                                 ))}
                             </Select>
-                            <FormHelperText></FormHelperText>
+                            {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
                             fullWidth
                             label={'Size'}
+                            value={size}
+                            onChange={e => setSize(e.target.value)}
                             helperText={'This is for lands and houses'}
                         />
                     </Grid>
                     <Grid item xs={12} container justify={'space-between'}>
                         <Grid item xs={5}>
-                            <TextField fullWidth label={'Year'} helperText={'This is for cars'} />
+                            <TextField
+                                fullWidth
+                                label={'Year'}
+                                helperText={'This is for cars'}
+                                onChange={e => setYear(e.target.value)}
+                            />
                         </Grid>
                         <Grid item xs={5}>
-                            <TextField label={'Transmission'} fullWidth select>
+                            <TextField
+                                label={'Transmission'}
+                                fullWidth
+                                select
+                                onChange={e => setTransmission(e.target.value as string)}
+                            >
                                 <MenuItem value={'Manual'}>Manual</MenuItem>
                                 <MenuItem value={'Auto'}>Auto</MenuItem>
                             </TextField>
@@ -321,8 +432,14 @@ const AddProduct = (props: RouteComponentProps) => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12} container justify={'center'}>
-                    <Button color={'primary'} variant={'contained'} type={'submit'}>
-                        Add Product
+                    <Button
+                        color={'primary'}
+                        variant={'contained'}
+                        disabled={loading}
+                        type={'submit'}
+                        onClick={submit}
+                    >
+                        {loading ? <CircularProgress /> : 'Add Product'}
                     </Button>
                 </Grid>
             </Grid>

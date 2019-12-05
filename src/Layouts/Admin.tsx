@@ -28,7 +28,7 @@ const useStyles = makeStyles(() => ({
 const Admin = ({location, history}: RouteComponentProps) => {
     const classes = useStyles();
 
-    const [categories, setCategories] = useState();
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         axios.interceptors.response.use(
