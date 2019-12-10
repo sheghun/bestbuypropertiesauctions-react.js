@@ -29,6 +29,7 @@ const Admin = ({location, history}: RouteComponentProps) => {
     const classes = useStyles();
 
     const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState([] as Array<Product>);
 
     useEffect(() => {
         axios.interceptors.response.use(
@@ -43,7 +44,7 @@ const Admin = ({location, history}: RouteComponentProps) => {
                         );
                     }
                 }
-                Promise.reject(err);
+                return Promise.reject(err);
             },
         );
     }, []);
@@ -61,10 +62,19 @@ const Admin = ({location, history}: RouteComponentProps) => {
         })();
     }, []);
 
+    useEffect(() => {
+        (async () => {
+            const {status, data} = await axios.get('/admin/products');
+            if (status === 200 && data.status === 'success') {
+                setProducts(data.data);
+            }
+        })();
+    }, []);
+
     return (
         <>
             <Grid container>
-                <AdminContext.Provider value={{categories}}>
+                <AdminContext.Provider value={{categories, products}}>
                     <Grid container>
                         <Grid item style={{width: 250}}>
                             <Sidebar />
