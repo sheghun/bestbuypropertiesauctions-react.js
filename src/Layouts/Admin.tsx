@@ -74,14 +74,15 @@ const Admin = ({location, history}: RouteComponentProps) => {
     return (
         <>
             <Grid container>
-                <AdminContext.Provider value={{categories, products}}>
+                <AdminContext.Provider value={{categories, products, setProducts}}>
                     <Grid container>
                         <Grid item style={{width: 250}}>
                             <Sidebar />
                         </Grid>
                         <Grid item md={9} sm={8} className={classes.pagesGrid}>
                             <Route path={'/admin/tl/overview'} component={Overview} />
-                            <Route path={'/admin/tl/products'} component={Products} />
+                            <Route path={'/admin/tl/products/add'} component={Products} />
+                            <Route path={'/admin/tl/products/edit/:id'} component={Products} />
                         </Grid>
                     </Grid>
                 </AdminContext.Provider>

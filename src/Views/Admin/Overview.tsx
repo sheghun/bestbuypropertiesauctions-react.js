@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -8,8 +8,9 @@ import Select from '@material-ui/core/Select';
 import {makeStyles} from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Logo from '../../Components/Logo';
-import {Link} from 'react-router-dom';
+import {Link, RouteComponentProps} from 'react-router-dom';
 import Card from '../../Components/Card';
+import {AdminContext} from '../../Context';
 
 const useStyles = makeStyles(theme => ({
     gridWrapper: {
@@ -30,8 +31,9 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Overview = () => {
+const Overview = ({history}: RouteComponentProps) => {
     const classes = useStyles();
+    const {products} = useContext(AdminContext);
 
     const [sortBy, setSortBy] = useState('');
     const [search, setSearch] = useState('');
@@ -95,15 +97,27 @@ const Overview = () => {
                         </FormControl>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} container>
+                <Grid item xs={12} container spacing={3}>
                     <Grid item xs={12} className={classes.productsHeading}>
                         <Typography variant={'h5'} align={'center'}>
                             Recent Products
                         </Typography>
                     </Grid>
-                    <Grid item sm={4}>
-                        <Card title={'100X100 Land'} description={'lorem ipsunefadvsadv'} id={1} />
-                    </Grid>
+                    {products.map(product => (
+                        <Grid key={product.id} item sm={4}>
+                            <Card
+                                title={product.name}
+                                description={product.description}
+                                id={1}
+                                price={product.price}
+                                image={product.featuredImage}
+                                onClick={() =>
+                                    history.push(`/admin/tl/products/edit/${product.id}`)
+                                }
+                                buttonText={'Edit'}
+                            />
+                        </Grid>
+                    ))}
                 </Grid>
             </Grid>
         </>

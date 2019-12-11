@@ -1,4 +1,4 @@
-import React, {useContext, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -12,7 +12,7 @@ import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import {Route, RouteComponentProps} from 'react-router';
+import {RouteComponentProps} from 'react-router';
 import {AdminContext} from '../../Context';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import axios from 'axios';
@@ -36,20 +36,12 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Products = () => {
-    return (
-        <>
-            <Route path={'/admin/tl/products/add'} render={props => <AddProduct {...props} />} />
-            <Route path={'/admin/tl/products/edit'} render={props => <EditProduct {...props} />} />
-        </>
-    );
-};
-
-const AddProduct = (props: RouteComponentProps) => {
+const Products = ({match, location}: RouteComponentProps) => {
     const classes = useStyles();
 
-    const {categories} = useContext(AdminContext);
+    const {categories, products, setProducts} = useContext(AdminContext);
 
+    const [isEdit, setIsEdit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -79,6 +71,31 @@ const AddProduct = (props: RouteComponentProps) => {
     const image3InputEl = useRef() as {current: HTMLInputElement | null};
     const image4InputEl = useRef() as {current: HTMLInputElement | null};
     const featuredImageInputEl = useRef() as {current: HTMLInputElement | null};
+
+    useEffect(() => {
+        // Check if it's the edit link
+        const id = location.pathname.includes('edit') && (match.params as any).id;
+        if (!id) return;
+        setIsEdit(true);
+        // Get the specific product to edit
+
+        const product = products.find(product => product.id == id);
+        if (!product) return;
+        setName(product.name);
+        const price = product.price;
+        setPrice('900');
+        setDescription(product.description);
+        setCategory((product.category.id as any) as string);
+        // Properties of the product
+        const productProps = product.properties;
+        console.log(productProps);
+        setSize(productProps.size || '');
+        setCondition(productProps.condition || '');
+        setTransmission(productProps.transmission || '');
+        setYear(productProps.year || '');
+        setImageSources(product.images || []);
+        setFeaturedImage(f => ({...f, src: product.featuredImage}));
+    }, [products]);
 
     const previewImages = (imageNumber: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = (e.target.files && e.target.files[0]) as File;
@@ -114,7 +131,7 @@ const AddProduct = (props: RouteComponentProps) => {
         return pass;
     };
 
-    const submit = async (e: React.FormEvent<HTMLFormElement> | any) => {
+    const add = async (e: React.FormEvent<HTMLFormElement> | any) => {
         e.preventDefault();
         if (!validate()) return;
 
@@ -150,6 +167,36 @@ const AddProduct = (props: RouteComponentProps) => {
         } catch (e) {}
         setLoading(false);
     };
+
+    const update = async () => {
+        setLoading(true);
+        try {
+            // Get current product using the id supplied
+            const id = location.pathname.includes('edit') && (match.params as any).id;
+            const d = {id, name, price, description, size, year, condition, category, transmission};
+            const {status, data} = await axios.put('/admin/products', d); // Upload product details
+            if (status === 200 && data.status === 'success') {
+                setSnackbar({
+                    open: true,
+                    message: 'Product updated',
+                    variant: 'success',
+                });
+                let currentProduct = products.find(product => product.id == id);
+                if (!currentProduct) return;
+                currentProduct = {...currentProduct, ...d} as any; // Update the values of the currentProduct
+                currentProduct!.category.id = category as any; // Update the category of the product
+                // Get currentProduct index
+                const currentProductIndex = products.findIndex(product => product.id == id);
+                if (!currentProductIndex) return;
+                // @ts-ignore
+                products[currentProductIndex] = currentProduct;
+                console.log(products[currentProductIndex]);
+                setProducts(products);
+            }
+        } catch (e) {}
+        setLoading(false);
+    };
+
     return (
         <>
             <Snackbar
@@ -163,7 +210,7 @@ const AddProduct = (props: RouteComponentProps) => {
                 className={classes.gridWrapper}
                 justify={'space-between'}
                 component={'form'}
-                onSubmit={submit}
+                onSubmit={add}
             >
                 <Grid item xs={12} className={classes.heading}>
                     <Typography variant={'h5'} align={'center'}>
@@ -171,7 +218,7 @@ const AddProduct = (props: RouteComponentProps) => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} container justify={'center'}>
-                    {featuredImage.file && (
+                    {featuredImage.src && (
                         <img height={'300px'} alt={name} src={featuredImage.src} />
                     )}
                     <input
@@ -221,7 +268,7 @@ const AddProduct = (props: RouteComponentProps) => {
                             required
                             placeholder={'Product Price'}
                             fullWidth
-                            name={price}
+                            value={price}
                             onChange={e => setPrice(e.target.value)}
                             error={!!errors.price}
                             helperText={errors.price}
@@ -370,6 +417,7 @@ const AddProduct = (props: RouteComponentProps) => {
                             <Select
                                 fullWidth
                                 required
+                                value={condition}
                                 onChange={e => setCondition(e.target.value as string)}
                             >
                                 <MenuItem value={'New'}>New</MenuItem>
@@ -389,6 +437,7 @@ const AddProduct = (props: RouteComponentProps) => {
                             <Select
                                 fullWidth
                                 required
+                                value={category}
                                 onChange={e => setCategory(e.target.value as string)}
                             >
                                 {categories.map(cat => (
@@ -414,6 +463,7 @@ const AddProduct = (props: RouteComponentProps) => {
                             <TextField
                                 fullWidth
                                 label={'Year'}
+                                value={year}
                                 helperText={'This is for cars'}
                                 onChange={e => setYear(e.target.value)}
                             />
@@ -423,6 +473,7 @@ const AddProduct = (props: RouteComponentProps) => {
                                 label={'Transmission'}
                                 fullWidth
                                 select
+                                value={transmission}
                                 onChange={e => setTransmission(e.target.value as string)}
                             >
                                 <MenuItem value={'Manual'}>Manual</MenuItem>
@@ -437,135 +488,15 @@ const AddProduct = (props: RouteComponentProps) => {
                         variant={'contained'}
                         disabled={loading}
                         type={'submit'}
-                        onClick={submit}
+                        onClick={isEdit ? update : add}
                     >
-                        {loading ? <CircularProgress /> : 'Add Product'}
-                    </Button>
-                </Grid>
-            </Grid>
-        </>
-    );
-};
-
-const EditProduct = (props: RouteComponentProps) => {
-    const classes = useStyles();
-
-    return (
-        <>
-            <Grid container className={classes.gridWrapper} justify={'space-between'}>
-                <Grid item xs={12} className={classes.heading}>
-                    <Typography variant={'h5'} align={'center'}>
-                        Edit Product
-                    </Typography>
-                </Grid>
-                <Grid
-                    item
-                    sm={12}
-                    md={5}
-                    container
-                    direction={'row'}
-                    justify={'space-evenly'}
-                    className={classes.productsInputsWrapper}
-                >
-                    <Grid item xs={12}>
-                        <TextField fullWidth placeholder={'Product Name'} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField placeholder={'Product Price'} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            placeholder={'Product Description'}
-                            multiline
-                            rows={'8'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} container>
-                        <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <Avatar>
-                                <IconButton>
-                                    <AddIcon />
-                                </IconButton>
-                            </Avatar>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant={'caption'}>
-                            Add your images you can add up to 4 images
-                        </Typography>
-                    </Grid>
-                </Grid>
-                <Grid
-                    item
-                    sm={12}
-                    md={5}
-                    container
-                    direction={'row'}
-                    justify={'space-evenly'}
-                    className={classes.productsInputsWrapper}
-                >
-                    <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id={'condition-select'} className={classes.selectLabel}>
-                                Condition
-                            </InputLabel>
-                            <Select fullWidth>
-                                <MenuItem></MenuItem>
-                            </Select>
-                            <FormHelperText>
-                                This field is for vehicles and usable items
-                            </FormHelperText>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label={'Size'}
-                            helperText={'This is for lands and houses'}
-                        />
-                    </Grid>
-                    <Grid item xs={12} container justify={'space-between'}>
-                        <Grid item xs={5}>
-                            <TextField fullWidth label={'Year'} helperText={'This is for cars'} />
-                        </Grid>
-                        <Grid item xs={5}>
-                            <TextField label={'Transmission'} fullWidth select>
-                                <MenuItem value={'Manual'}>Manual</MenuItem>
-                                <MenuItem value={'Auto'}>Auto</MenuItem>
-                            </TextField>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button color={'primary'} fullWidth>
-                            Upload featured image of the product
-                        </Button>
-                    </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                    <Button color={'primary'} fullWidth variant={'contained'}>
-                        Add Product
+                        {loading ? (
+                            <CircularProgress />
+                        ) : isEdit ? (
+                            'Update Product '
+                        ) : (
+                            'Add Product'
+                        )}
                     </Button>
                 </Grid>
             </Grid>

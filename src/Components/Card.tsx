@@ -5,7 +5,6 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
-import Car from '../assets/images/car.jpg';
 import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
@@ -33,23 +32,28 @@ interface Props {
     description: string;
     className?: string;
     id: number;
+    price?: number;
+    image?: string;
+    buttonText?: string;
+    onClick?: () => void;
 }
 
-export default function MediaCard({title, description, id, ...props}: Props) {
+export default function MediaCard(props: Props) {
     const classes = useStyles();
+    const {title, description, id, image, price, buttonText, onClick, ...others} = props;
 
     return (
         <Card
-            {...props}
-            className={classNames({[classes.card]: true, [props.className || '']: true})}
+            {...others}
+            className={classNames({[classes.card]: true, [others.className || '']: true})}
         >
-            <CardMedia className={classes.media} image={`${Car}`} title="Contemplative Reptile" />
+            <CardMedia className={classes.media} image={image} title="Contemplative Reptile" />
             <CardContent className={classes.cardContent}>
                 <Typography gutterBottom variant="h5" component="h2">
                     {title}
                 </Typography>
                 <Typography gutterBottom variant="h5" component="h2">
-                    73K
+                    {price}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     {description}
@@ -57,8 +61,8 @@ export default function MediaCard({title, description, id, ...props}: Props) {
             </CardContent>
             <CardActions className={classes.cardActions}>
                 <Grid container justify={'center'}>
-                    <Button size="medium" variant={'contained'} color="primary">
-                        View
+                    <Button size="medium" variant={'contained'} color="primary" onClick={onClick}>
+                        {buttonText}
                     </Button>
                 </Grid>
             </CardActions>
