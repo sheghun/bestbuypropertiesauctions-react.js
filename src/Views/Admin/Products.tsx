@@ -73,28 +73,31 @@ const Products = ({match, location}: RouteComponentProps) => {
     const featuredImageInputEl = useRef() as {current: HTMLInputElement | null};
 
     useEffect(() => {
-        // Check if it's the edit link
-        const id = location.pathname.includes('edit') && (match.params as any).id;
-        if (!id) return;
-        setIsEdit(true);
-        // Get the specific product to edit
+        (async () => {
+            // Check if it's the edit link
+            const id = location.pathname.includes('edit') && (match.params as any).id;
+            if (!id) return;
+            setIsEdit(true);
+            // Get the specific product to edit
 
-        const product = products.find(product => product.id == id);
-        if (!product) return;
-        setName(product.name);
-        const price = product.price;
-        setPrice('900');
-        setDescription(product.description);
-        setCategory((product.category.id as any) as string);
-        // Properties of the product
-        const productProps = product.properties;
-        console.log(productProps);
-        setSize(productProps.size || '');
-        setCondition(productProps.condition || '');
-        setTransmission(productProps.transmission || '');
-        setYear(productProps.year || '');
-        setImageSources(product.images || []);
-        setFeaturedImage(f => ({...f, src: product.featuredImage}));
+            const {data, status} = await axios.get(`/admin/products/${id}`);
+            if (status === 200 && data.status === 'success') {
+                const product = data.data;
+                setName(product.name);
+                setPrice(String(product.price));
+                setDescription(product.description);
+                setCategory((product.category.id as any) as string);
+                // Properties of the product
+                const productProps = product.properties;
+                console.log(productProps);
+                setSize(productProps.size || '');
+                setCondition(productProps.condition || '');
+                setTransmission(productProps.transmission || '');
+                setYear(productProps.year || '');
+                setImageSources(product.images || []);
+                setFeaturedImage(f => ({...f, src: product.featuredImage}));
+            }
+        })();
     }, [products]);
 
     const previewImages = (imageNumber: string) => (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from './Card';
+import Card, {CardProps} from './Card';
 import styled, {keyframes} from 'styled-components';
 
 const slide = keyframes`
@@ -12,11 +12,8 @@ const slide = keyframes`
   }
 `;
 
-interface Props {
-    title: string;
-    description: string;
+interface Props extends CardProps {
     index: number;
-    id: number;
 }
 
 export default function FeaturedCards({id, index, ...props}: Props) {

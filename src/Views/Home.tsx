@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Header from '../Components/Header';
 import Card from '../Components/Card';
@@ -8,6 +8,10 @@ import Divider from '@material-ui/core/Divider';
 import FeaturedCards from '../Components/FeaturedCards';
 import Footer from '../Components/Footer';
 import Button from '@material-ui/core/Button';
+import axios from 'axios';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import {RouteComponentProps} from 'react-router';
+import {Link} from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -60,8 +64,13 @@ const products = [
     },
 ];
 
-const Home = () => {
+const Home = ({history}: RouteComponentProps) => {
     const classes = useStyles();
+
+    const [loading, setLoading] = useState(false);
+    const [featuredProducts, setFeaturedProducts] = useState([] as Array<Product>);
+    const [topDealsProducts, setTopDealsProducts] = useState([] as Array<Product>);
+
     useEffect(() => {
         const string = ['BEST', 'BUY', 'PROPERTIES', 'AUCTIONS'];
         let i = string.length - 1;
@@ -70,6 +79,25 @@ const Home = () => {
             document.title = string[i];
             i++;
         }, 1000);
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            const {status, data} = await axios.get('/products?featured=true');
+            if (status === 200 && data.status === 'success') {
+                setFeaturedProducts(data.data);
+            }
+            setLoading(false);
+        })();
+        (async () => {
+            setLoading(true);
+            const {status, data} = await axios.get('/products?topDeals=true');
+            if (status === 200 && data.status === 'success') {
+                setTopDealsProducts(data.data);
+            }
+            setLoading(false);
+        })();
     }, []);
     return (
         <>
@@ -91,60 +119,83 @@ const Home = () => {
                     </Grid>
                 </Grid>
 
-                <Grid container className={classes.featuredProducts}>
-                    <Grid item xs={12} className={classes.featuredProductsText}>
-                        <Typography variant={'h5'} align={'center'}>
-                            Featured Products
-                        </Typography>
-                    </Grid>
-                    {products.map((product, i) => (
-                        <Grid item key={i} xs={12} md={4}>
-                            <FeaturedCards
-                                title={product.title}
-                                description={product.description}
-                                index={i}
-                                id={i}
-                            />
+                {loading ? (
+                    <Grid container justify={'center'}>
+                        <Grid item xs={12} container justify={'center'}>
+                            <CircularProgress />
                         </Grid>
-                    ))}
-                    <Grid item xs={12}>
-                        <br />
-                        <br />
-                        <Typography variant={'h6'}>Top Deals</Typography>
-                        <Divider />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Grid container justify={'space-between'} className={classes.topDeals}>
-                            {products.map((product, i) => (
-                                <Grid item key={i} md={3}>
-                                    <Card
-                                        title={product.title}
-                                        description={product.description}
-                                        id={i}
-                                    />
+                ) : (
+                    <Grid container className={classes.featuredProducts}>
+                        <Grid item xs={12} className={classes.featuredProductsText}>
+                            <Typography variant={'h5'} align={'center'}>
+                                Featured Products
+                            </Typography>
+                        </Grid>
+                        {featuredProducts.map((product, i) => (
+                            <Grid item key={i} xs={12} md={4}>
+                                <FeaturedCards
+                                    title={product.name}
+                                    description={product.description}
+                                    index={i}
+                                    price={product.price}
+                                    image={product.featuredImage}
+                                    id={i}
+                                    buttonText={'View'}
+                                    onClick={() => history.push(`/shop/item/${product.id}`)}
+                                />
+                            </Grid>
+                        ))}
+                        <Grid item xs={12}>
+                            <br />
+                            <br />
+                            <Typography variant={'h6'}>Top Deals</Typography>
+                            <Divider />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Grid
+                                container
+                                justify={'space-between'}
+                                spacing={3}
+                                className={classes.topDeals}
+                            >
+                                {topDealsProducts.map((product, i) => (
+                                    <Grid item key={i} md={4}>
+                                        <Card
+                                            title={product.name}
+                                            description={product.description}
+                                            buttonText={'View'}
+                                            image={product.featuredImage}
+                                            id={i}
+                                            price={product.price}
+                                            onClick={() => history.push(`/shop/item/${product.id}`)}
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={12} style={{marginTop: '4rem'}}>
+                            <Grid container justify={'center'}>
+                                <Grid item xs={12}>
+                                    <Typography variant={'body2'} align={'center'}>
+                                        View More
+                                    </Typography>
                                 </Grid>
-                            ))}
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} style={{marginTop: '4rem'}}>
-                        <Grid container justify={'center'}>
-                            <Grid item xs={12}>
-                                <Typography variant={'body2'} align={'center'}>
-                                    View More
-                                </Typography>
-                            </Grid>
-                            <br />
-                            <br />
-                            <Grid item xs={12}>
-                                <Typography align={'center'}>
-                                    <Button variant={'contained'} color={'primary'}>
-                                        Products Page
-                                    </Button>
-                                </Typography>
+                                <br />
+                                <br />
+                                <Grid item xs={12}>
+                                    <Typography align={'center'}>
+                                        <Link to={'/shop'}>
+                                            <Button variant={'contained'} color={'primary'}>
+                                                Go To Shop
+                                            </Button>
+                                        </Link>
+                                    </Typography>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
+                )}
             </main>
             <Footer />
         </>

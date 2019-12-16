@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-interface Props {
+export interface CardProps {
     title: string;
     description: string;
     className?: string;
@@ -38,7 +38,7 @@ interface Props {
     onClick?: () => void;
 }
 
-export default function MediaCard(props: Props) {
+export default function MediaCard(props: CardProps) {
     const classes = useStyles();
     const {title, description, id, image, price, buttonText, onClick, ...others} = props;
 
@@ -53,7 +53,7 @@ export default function MediaCard(props: Props) {
                     {title}
                 </Typography>
                 <Typography gutterBottom variant="h5" component="h2">
-                    {price}
+                    ₦{Number(price).toLocaleString()}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     {description}

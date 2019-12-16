@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -11,6 +11,9 @@ import Logo from '../../Components/Logo';
 import {Link, RouteComponentProps} from 'react-router-dom';
 import Card from '../../Components/Card';
 import {AdminContext} from '../../Context';
+import axios from 'axios';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles(theme => ({
     gridWrapper: {
@@ -31,12 +34,48 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Overview = ({history}: RouteComponentProps) => {
+const Overview = ({history, location}: RouteComponentProps) => {
     const classes = useStyles();
-    const {products} = useContext(AdminContext);
+    const {products, categories, setProducts} = useContext(AdminContext);
 
+    const [productsArray, setProductsArray] = useState([] as Array<Product>);
+    const [loading, setLoading] = useState(false);
     const [sortBy, setSortBy] = useState('');
     const [search, setSearch] = useState('');
+    const [category, setCategory] = useState('');
+
+    const filterProducts = () => {
+        (async () => {
+            setLoading(true);
+
+            // Params to append to get from the backend
+            const params = {} as any;
+            if (sortBy) params.sortBy = sortBy;
+            if (category) params.category = category;
+            const {status, data} = await axios.get('/admin/products', {params});
+            if (status === 200 && data.status === 'success') {
+                setProducts(data.data);
+            }
+            setLoading(false);
+        })();
+    };
+
+    useEffect(() => {
+        filterProducts();
+    }, [location.search, location.pathname]);
+
+    const applyFilter = async () => {
+        setLoading(true);
+        // Get current url
+        let url = location.pathname;
+        if (sortBy) {
+            url += `?sortBy=${sortBy}`;
+        }
+        if (category) {
+            url += `&category=${category}`;
+        }
+        history.push(url);
+    };
 
     return (
         <>
@@ -64,7 +103,12 @@ const Overview = ({history}: RouteComponentProps) => {
                             <InputLabel className={classes.formControlLabel} id={'sort-by-select'}>
                                 Sort By
                             </InputLabel>
-                            <Select labelId={'sort-by-select'} fullWidth value={sortBy}>
+                            <Select
+                                labelId={'sort-by-select'}
+                                fullWidth
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value as string)}
+                            >
                                 <MenuItem value={'date'}>Date</MenuItem>
                                 <MenuItem value={'name'}>Name</MenuItem>
                                 <MenuItem value={'price'}>Price</MenuItem>
@@ -87,37 +131,59 @@ const Overview = ({history}: RouteComponentProps) => {
                                 className={classes.formControlLabel}
                                 id={'filter-items-select'}
                             >
-                                Filter Items
+                                Category
                             </InputLabel>
-                            <Select labelId={'filter-items-select'} fullWidth value={sortBy}>
-                                <MenuItem value={'date'}>Date</MenuItem>
-                                <MenuItem value={'name'}>Name</MenuItem>
-                                <MenuItem value={'price'}>Price</MenuItem>
+                            <Select
+                                labelId={'filter-items-select'}
+                                fullWidth
+                                value={category}
+                                onChange={e => setCategory(e.target.value as string)}
+                            >
+                                {categories.map(cat => (
+                                    <MenuItem key={cat.id} value={cat.id}>
+                                        {cat.title}
+                                    </MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} container spacing={3}>
+                {(sortBy || category) && (
+                    <Grid item xs={12} container justify={'center'} style={{margin: '3rem'}}>
+                        <Button variant={'contained'} color={'primary'} onClick={applyFilter}>
+                            Apply Filters
+                        </Button>
+                    </Grid>
+                )}
+                <Grid item xs={12} container spacing={3} style={{margin: '2rem'}}>
                     <Grid item xs={12} className={classes.productsHeading}>
                         <Typography variant={'h5'} align={'center'}>
                             Recent Products
                         </Typography>
                     </Grid>
-                    {products.map(product => (
-                        <Grid key={product.id} item sm={4}>
-                            <Card
-                                title={product.name}
-                                description={product.description}
-                                id={1}
-                                price={product.price}
-                                image={product.featuredImage}
-                                onClick={() =>
-                                    history.push(`/admin/tl/products/edit/${product.id}`)
-                                }
-                                buttonText={'Edit'}
-                            />
+                    {loading ? (
+                        <Grid item xs={12} container justify={'center'}>
+                            <Grid>
+                                <CircularProgress />
+                            </Grid>
                         </Grid>
-                    ))}
+                    ) : (
+                        products.map(product => (
+                            <Grid key={product.id} item sm={4}>
+                                <Card
+                                    title={product.name}
+                                    description={product.description}
+                                    id={1}
+                                    price={product.price}
+                                    image={product.featuredImage}
+                                    onClick={() =>
+                                        history.push(`/admin/tl/products/edit/${product.id}`)
+                                    }
+                                    buttonText={'Edit'}
+                                />
+                            </Grid>
+                        ))
+                    )}
                 </Grid>
             </Grid>
         </>

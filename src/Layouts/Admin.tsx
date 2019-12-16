@@ -62,15 +62,6 @@ const Admin = ({location, history}: RouteComponentProps) => {
         })();
     }, []);
 
-    useEffect(() => {
-        (async () => {
-            const {status, data} = await axios.get('/admin/products');
-            if (status === 200 && data.status === 'success') {
-                setProducts(data.data);
-            }
-        })();
-    }, []);
-
     return (
         <>
             <Grid container>
