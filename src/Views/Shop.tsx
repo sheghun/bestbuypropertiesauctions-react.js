@@ -9,6 +9,8 @@ import Footer from '../Components/Footer';
 import Pagination from 'material-ui-flat-pagination';
 import queryString from 'query-string';
 import {RouteComponentProps} from 'react-router';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import axios from 'axios';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -29,28 +31,63 @@ const useStyles = makeStyles(theme => ({
 const Shop = ({history, location}: RouteComponentProps) => {
     const classes = useStyles();
 
-    const [category, SetCategory] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    const [categories, setCategories] = useState([] as Array<Category>);
+    const [category, setCategory] = useState(0);
+    const [products, setProducts] = useState([] as Array<Product>);
 
     const [pageOffset, setPageOffset] = useState(0);
-    const [limit, _] = useState(50);
+    const [limit] = useState(50);
 
     const [total, setTotal] = useState(1000);
 
     useEffect(() => {
-        const queryParam = queryString.parse(location.search);
-        // Check if the page parameter exists
-        if (!queryParam.page) return;
+        (async () => {
+            const {status, data} = await axios.get('/categories');
+            if (status === 200 && data.status === 'success') {
+                setCategories(data.data);
+            }
+        })();
+    }, []);
 
-        const page = Number(queryParam.page);
+    useEffect(() => {
+        (async () => {
+            const queryParam = queryString.parse(location.search);
 
-        setPageOffset(p => limit * (page -1));
+            // Check if the page parameter exists
+            const page = Number(queryParam.page ? queryParam.page : 1);
+            const category = queryParam.category; // Get the category
+
+            const params = {} as any; // Params to attach to url when sending requests to the back end
+
+            if (category) {
+                params.category = category;
+                setCategory(category as any);
+            }
+            params.limit = limit * page;
+
+            setPageOffset(limit * (page - 1));
+
+            const {status, data} = await axios.get('/products', {params});
+            if (status === 200 && data.status === 'success') {
+                setProducts(data.data);
+            }
+        })();
     }, [location.search]);
 
     const paginate = (offset: number, page: number) => {
-        history.push(`/shop?page=${page}`);
+        const queryParam = queryString.parse(location.search);
+        queryParam.page = page as any;
+        history.push(`/shop?${queryString.stringify(queryParam)}`);
     };
 
-    console.log(pageOffset);
+    const changeCategory = (e: any) => {
+        const queryParam = queryString.parse(location.search);
+        console.log(e);
+        queryParam.category = e.target.value as any;
+        history.push(`/shop?${queryString.stringify(queryParam)}`);
+    };
 
     return (
         <>
@@ -62,31 +99,43 @@ const Shop = ({history, location}: RouteComponentProps) => {
                     style={{marginTop: '2rem', marginBottom: '4rem'}}
                 >
                     <Grid xs={12} sm={6} md={4}>
-                        <Select fullWidth value={category} variant={'outlined'}>
+                        <Select
+                            fullWidth
+                            value={category}
+                            variant={'outlined'}
+                            onChange={changeCategory}
+                        >
                             <MenuItem value={0}>Select a Category</MenuItem>
-                            <MenuItem>Vehicles</MenuItem>
-                            <MenuItem>Real Estates</MenuItem>
-                            <MenuItem>Furniture</MenuItem>
+                            {categories.map(category => (
+                                <MenuItem key={category.id} value={category.id}>
+                                    {category.title}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </Grid>
                 </Grid>
-                <Grid container justify={'space-evenly'}>
-                    {(() => {
-                        const products = [];
-                        for (let i = 1; i <= 50; i++) {
-                            products.push(
-                                <Grid xs={12} sm={4} style={{marginBottom: '1rem'}}>
-                                    <Card
-                                        title={'Testing'}
-                                        description={'Little details about the product'}
-                                        id={i}
-                                    />
-                                </Grid>,
-                            );
-                        }
-                        return products;
-                    })()}
-                </Grid>
+                {loading ? (
+                    <Grid container justify={'center'}>
+                        <Grid item xs={12} container justify={'center'}>
+                            <CircularProgress />
+                        </Grid>
+                    </Grid>
+                ) : (
+                    <Grid container justify={'space-evenly'}>
+                        {products.map(product => (
+                            <Grid xs={12} key={product.id} sm={4} style={{marginBottom: '1rem'}}>
+                                <Card
+                                    title={product.name}
+                                    description={product.description}
+                                    price={product.price}
+                                    image={product.featuredImage}
+                                    onClick={() => history.push(`/shop/item/${product.id}`)}
+                                    id={product.id}
+                                />
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
                 <Grid container justify={'center'} style={{marginTop: '4rem'}}>
                     <Pagination
                         limit={limit}
