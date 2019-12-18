@@ -14,6 +14,8 @@ import {AdminContext} from '../../Context';
 import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import queryString from 'query-string';
+import Pagination from 'material-ui-flat-pagination/lib/Pagination';
 
 const useStyles = makeStyles(theme => ({
     gridWrapper: {
@@ -32,49 +34,94 @@ const useStyles = makeStyles(theme => ({
     productsHeading: {
         padding: theme.spacing(4),
     },
+    paginationText: {
+        fontSize: '18px',
+    },
 }));
 
 const Overview = ({history, location}: RouteComponentProps) => {
     const classes = useStyles();
     const {products, categories, setProducts} = useContext(AdminContext);
 
-    const [productsArray, setProductsArray] = useState([] as Array<Product>);
     const [loading, setLoading] = useState(false);
     const [sortBy, setSortBy] = useState('');
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
 
-    const filterProducts = () => {
+    const [pageOffset, setPageOffset] = useState(0);
+    const [limit] = useState(50);
+    const [total, setTotal] = useState(1000);
+
+    useEffect(() => {
         (async () => {
             setLoading(true);
+            const queryParam = queryString.parse(location.search);
 
-            // Params to append to get from the backend
-            const params = {} as any;
-            if (sortBy) params.sortBy = sortBy;
-            if (category) params.category = category;
-            const {status, data} = await axios.get('/admin/products', {params});
+            // Check if the page parameter exists
+            const page = Number(queryParam.page ? queryParam.page : 1);
+            const {category, search, sortBy} = queryParam; // Get the category
+
+            const params = {} as any; // Params to attach to url when sending requests to the back end
+
+            if (category) {
+                params.category = category;
+                setCategory(category as any);
+            } else {
+                setCategory('');
+            }
+
+            // Check if the user is searching
+            if (search) {
+                params.search = search;
+                setSearch(search as any);
+            }
+
+            if (sortBy) {
+                params.sortBy = sortBy;
+                setSortBy(sortBy as string);
+            } else {
+                setSortBy('');
+            }
+
+            params.limit = limit * page;
+
+            setPageOffset(limit * (page - 1));
+
+            const {status, data} = await axios.get('/products', {params});
             if (status === 200 && data.status === 'success') {
                 setProducts(data.data);
             }
             setLoading(false);
         })();
+    }, [location.search]);
+
+    const changeCategory = async (e: any) => {
+        const queryParam = queryString.parse(location.search);
+        queryParam.category = e.target.value as any;
+        if ((queryParam.category as any) == 0) {
+            delete queryParam.category;
+        }
+        history.push(`/admin/tl/overview?${queryString.stringify(queryParam)}`);
+    };
+    const changeSortBy = async (e: any) => {
+        const queryParam = queryString.parse(location.search);
+        queryParam.sortBy = e.target.value as any;
+        if ((queryParam.sortBy as any) == 0) {
+            delete queryParam.sortBy;
+        }
+        history.push(`/admin/tl/overview?${queryString.stringify(queryParam)}`);
+    };
+    const searchHandler = async (e: any) => {
+        e.preventDefault();
+        const queryParam = queryString.parse(location.search);
+        queryParam.search = search;
+        history.push(`/admin/tl/overview?${queryString.stringify(queryParam)}`);
     };
 
-    useEffect(() => {
-        filterProducts();
-    }, [location.search, location.pathname]);
-
-    const applyFilter = async () => {
-        setLoading(true);
-        // Get current url
-        let url = location.pathname;
-        if (sortBy) {
-            url += `?sortBy=${sortBy}`;
-        }
-        if (category) {
-            url += `&category=${category}`;
-        }
-        history.push(url);
+    const paginate = (offset: number, page: number) => {
+        const queryParam = queryString.parse(location.search);
+        queryParam.page = page as any;
+        history.push(`/admin/tl/overview?${queryString.stringify(queryParam)}`);
     };
 
     return (
@@ -107,15 +154,21 @@ const Overview = ({history, location}: RouteComponentProps) => {
                                 labelId={'sort-by-select'}
                                 fullWidth
                                 value={sortBy}
-                                onChange={e => setSortBy(e.target.value as string)}
+                                onChange={changeSortBy}
                             >
-                                <MenuItem value={'date'}>Date</MenuItem>
+                                <MenuItem value={0}>Select Sort By</MenuItem>
+                                <MenuItem value={'createdAt'}>Date</MenuItem>
                                 <MenuItem value={'name'}>Name</MenuItem>
                                 <MenuItem value={'price'}>Price</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid sm={6} className={classes.searchInput}>
+                    <Grid
+                        sm={6}
+                        className={classes.searchInput}
+                        component={'form'}
+                        onSubmit={searchHandler}
+                    >
                         <TextField
                             fullWidth
                             name={'search'}
@@ -137,8 +190,9 @@ const Overview = ({history, location}: RouteComponentProps) => {
                                 labelId={'filter-items-select'}
                                 fullWidth
                                 value={category}
-                                onChange={e => setCategory(e.target.value as string)}
+                                onChange={changeCategory}
                             >
+                                <MenuItem value={0}>Select A Category</MenuItem>
                                 {categories.map(cat => (
                                     <MenuItem key={cat.id} value={cat.id}>
                                         {cat.title}
@@ -148,13 +202,6 @@ const Overview = ({history, location}: RouteComponentProps) => {
                         </FormControl>
                     </Grid>
                 </Grid>
-                {(sortBy || category) && (
-                    <Grid item xs={12} container justify={'center'} style={{margin: '3rem'}}>
-                        <Button variant={'contained'} color={'primary'} onClick={applyFilter}>
-                            Apply Filters
-                        </Button>
-                    </Grid>
-                )}
                 <Grid item xs={12} container spacing={3} style={{margin: '2rem'}}>
                     <Grid item xs={12} className={classes.productsHeading}>
                         <Typography variant={'h5'} align={'center'}>
@@ -162,8 +209,8 @@ const Overview = ({history, location}: RouteComponentProps) => {
                         </Typography>
                     </Grid>
                     {loading ? (
-                        <Grid item xs={12} container justify={'center'}>
-                            <Grid>
+                        <Grid container justify={'center'}>
+                            <Grid item xs={12} container justify={'center'}>
                                 <CircularProgress />
                             </Grid>
                         </Grid>
@@ -184,6 +231,16 @@ const Overview = ({history, location}: RouteComponentProps) => {
                             </Grid>
                         ))
                     )}
+                </Grid>
+                <Grid container justify={'center'} style={{marginTop: '4rem'}}>
+                    <Pagination
+                        limit={limit}
+                        offset={pageOffset}
+                        classes={{label: classes.paginationText}}
+                        total={total}
+                        size={'large'}
+                        onClick={(e, offset, page) => paginate(offset, page)}
+                    />
                 </Grid>
             </Grid>
         </>
