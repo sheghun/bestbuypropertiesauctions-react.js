@@ -9,6 +9,7 @@ import {Link, RouteComponentProps} from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import axios, {AxiosError} from 'axios';
 import Snackbar from '../../Components/Snackbar';
+import {getReturnUrl} from '../../_helpers';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -26,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Login = ({history}: RouteComponentProps) => {
+const Login = ({history, location}: RouteComponentProps) => {
     const classes = useStyles();
 
     const [snackbar, setSnackbar] = useState({
@@ -48,7 +49,8 @@ const Login = ({history}: RouteComponentProps) => {
             if (status === 200 && data.status === 'success') {
                 setSnackbar({open: true, variant: 'success', message: 'Sign in Successful'});
                 setTimeout(() => {
-                    history.push('/admin/tl/overview');
+                    const returnUrl = getReturnUrl(location);
+                    history.push((returnUrl as string) || '/admin/tl/overview');
                 }, 3000);
             }
         } catch (e) {

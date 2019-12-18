@@ -17,9 +17,9 @@ const useStyles = makeStyles(theme => ({
         height: 140,
     },
     cardContent: {
-        padding: `${theme.spacing(4)}px ${theme.spacing(8)}px`,
+        padding: `${theme.spacing(2)}px ${theme.spacing(4)}px`,
         [theme.breakpoints.down('sm')]: {
-            padding: `${theme.spacing(4)}px ${theme.spacing(4)}px`,
+            padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
         },
     },
     cardActions: {
