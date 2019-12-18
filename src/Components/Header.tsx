@@ -69,12 +69,13 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Header = ({location}: RouteComponentProps) => {
+const Header = ({location, history}: RouteComponentProps) => {
     const classes = useStyles();
     const theme = useTheme();
     const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [hangToTop, setHangToTop] = useState(false);
+    const [search, setSearch] = useState('');
     const navLinkContainerEl = useRef();
 
     // Decided whether to hang the nav to the top
@@ -118,6 +119,12 @@ const Header = ({location}: RouteComponentProps) => {
             window.onscroll = null;
         };
     }, [smallScreen, hangTop]);
+
+    const searchHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        history.push(`/shop?search=${search}`);
+    };
+
     return (
         <>
             <img
@@ -149,8 +156,13 @@ const Header = ({location}: RouteComponentProps) => {
                         src={logo}
                     />
                 </Grid>
-                <Grid item xs={12} md={4} component={'form'} onSubmit={() => alert('submit')}>
-                    <TextField fullWidth label={'Search for a property'} />
+                <Grid item xs={12} md={4} component={'form'} onSubmit={searchHandler}>
+                    <TextField
+                        fullWidth
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        label={'Search for a property'}
+                    />
                 </Grid>
                 <Grid item xs={12} md={3}>
                     <Grid

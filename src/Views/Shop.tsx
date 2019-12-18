@@ -53,6 +53,7 @@ const Shop = ({history, location}: RouteComponentProps) => {
 
     useEffect(() => {
         (async () => {
+            setLoading(true);
             const queryParam = queryString.parse(location.search);
 
             // Check if the page parameter exists
@@ -73,6 +74,7 @@ const Shop = ({history, location}: RouteComponentProps) => {
             if (status === 200 && data.status === 'success') {
                 setProducts(data.data);
             }
+            setLoading(false);
         })();
     }, [location.search]);
 
@@ -84,7 +86,6 @@ const Shop = ({history, location}: RouteComponentProps) => {
 
     const changeCategory = (e: any) => {
         const queryParam = queryString.parse(location.search);
-        console.log(e);
         queryParam.category = e.target.value as any;
         history.push(`/shop?${queryString.stringify(queryParam)}`);
     };
@@ -129,6 +130,7 @@ const Shop = ({history, location}: RouteComponentProps) => {
                                     description={product.description}
                                     price={product.price}
                                     image={product.featuredImage}
+                                    buttonText={'View'}
                                     onClick={() => history.push(`/shop/item/${product.id}`)}
                                     id={product.id}
                                 />
