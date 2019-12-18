@@ -12,6 +12,7 @@ import axios from 'axios';
 
 const Overview = loadable(() => import('../Views/Admin/Overview'), {fallback: <LoadingPage />});
 const Products = loadable(() => import('../Views/Admin/Products'), {fallback: <LoadingPage />});
+const Categories = loadable(() => import('../Views/Admin/Categories'), {fallback: <LoadingPage />});
 
 const useStyles = makeStyles(() => ({
     '@global': {
@@ -65,13 +66,14 @@ const Admin = ({location, history}: RouteComponentProps) => {
     return (
         <>
             <Grid container>
-                <AdminContext.Provider value={{categories, products, setProducts}}>
+                <AdminContext.Provider value={{categories, products, setProducts, setCategories}}>
                     <Grid container>
                         <Grid item style={{width: 250}}>
                             <Sidebar />
                         </Grid>
                         <Grid item md={9} sm={8} className={classes.pagesGrid}>
                             <Route path={'/admin/tl/overview'} component={Overview} />
+                            <Route path={'/admin/tl/categories'} component={Categories} />
                             <Route path={'/admin/tl/products/add'} component={Products} />
                             <Route path={'/admin/tl/products/edit/:id'} component={Products} />
                         </Grid>

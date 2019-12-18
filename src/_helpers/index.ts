@@ -22,7 +22,7 @@ export const getReturnUrl = (
                     continue;
                 }
                 // @ts-ignore
-                if (queryParams.hasOwnProperty(fragments)) {
+                if (queryParams[fragments] !== null) {
                     url += fragments + '=' + queryParams[fragments] + '&';
                 }
             }
