@@ -58,14 +58,22 @@ const Shop = ({history, location}: RouteComponentProps) => {
 
             // Check if the page parameter exists
             const page = Number(queryParam.page ? queryParam.page : 1);
-            const category = queryParam.category; // Get the category
+            const {category, search} = queryParam; // Get the category
 
             const params = {} as any; // Params to attach to url when sending requests to the back end
 
             if (category) {
                 params.category = category;
                 setCategory(category as any);
+            } else {
+                setCategory(0);
             }
+
+            // Check if the users is searching
+            if (search) {
+                params.search = search;
+            }
+
             params.limit = limit * page;
 
             setPageOffset(limit * (page - 1));
@@ -87,6 +95,9 @@ const Shop = ({history, location}: RouteComponentProps) => {
     const changeCategory = (e: any) => {
         const queryParam = queryString.parse(location.search);
         queryParam.category = e.target.value as any;
+        if ((queryParam.category as any) == 0) {
+            delete queryParam.category;
+        }
         history.push(`/shop?${queryString.stringify(queryParam)}`);
     };
 
